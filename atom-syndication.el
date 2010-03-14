@@ -510,7 +510,7 @@ cdr."
     (concat
      (symbol-name name) "=\"" (atom-syndication-sanitize value) "\"")))
 
-;;; Misc functions
+;;;; Misc functions
 (defun atom-syndication-sanitize (text)
   "Sanitize TEXT for xml output.
 
