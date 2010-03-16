@@ -263,10 +263,11 @@ Optional parameter URI is a uri."
 (defun atom-syndication-construct-text (text &optional type)
   "Return atom text construct for TEXT.
 
-Optional parameter TYPE can be the symbol 'text for plain text,
-'html for html or 'xhtml content.  If TYPE is ommitted it
-defaults to 'text.  To create html and xhtml content the
-functions in `atom-syndication-construct-text-html-function' and
+Optional parameter TYPE can be the string \"text\" for plain
+text, \"html\" for html or \"xhtml\" for xhtml content.  If TYPE
+is ommitted it defaults to 'text.  To create html and xhtml
+content the functions in
+`atom-syndication-construct-text-html-function' and
 `atom-syndication-construct-text-xhtml-function' are called."
   (cond
    ((or (eq type nil) (string= type "text"))
