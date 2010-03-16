@@ -35,6 +35,7 @@
     (length . (".+"))
     (rel . (".+"))
     (scheme . (".+"))
+    (src . (".+"))
     (term . (".+"))
     (title . (".+"))
     (type . ("^text$" "^html$" "^xhtml$" "^.+/.+$"))
@@ -52,6 +53,7 @@ expression must match a given value.")
 
 (defconst atom-syndication-element-spec-alist
   '((category (term scheme label xml:lang xml:base) nil)
+    (content (type src xml:lang xml:base) (".*"))
     (contributor () (".+"))
     (name () (".+"))
     (email () (".+"))
@@ -237,6 +239,24 @@ container element."
 				  value))
 			 ) elements "\n")
 	   attr)))
+
+(defun atom-syndication-element-content (value &optional type src &rest attr)
+  "Return atom content element.
+
+VALUE is the content.
+Optional parameter TYPE is the content type.  If ommited, type defaults to \"text\".
+Optional argument SRC is the url of the content.
+Optional argument ATTR is an alist of additional attributes."
+  (when (and src value)
+    (error "Content element with src attribute must be empty: %s, %s" src value))
+  (when type
+    (setq attr (append (list (cons 'type type)) attr)))
+  (when src (setq attr (append (list (cons 'src src)) attr)))
+  (apply 'atom-syndication-element 'content
+	 (if (member type '("text" "html" "xhtml"))
+	     (atom-syndication-construct-text value type)
+	   (if value (atom-syndication-sanitize value) value))
+	 attr))
 
 ;;;; atom constructs
 (defun atom-syndication-construct-person (name &optional email uri)
