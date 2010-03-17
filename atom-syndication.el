@@ -423,7 +423,8 @@ Optional parameter ATTR is an alist of atom attributes."
   "Return email metadata element.
 
 EMAIL is an email address.
-Optional parameter ATTR is an alist of atom attributes.")
+Optional parameter ATTR is an alist of atom attributes."
+  (apply 'atom-syndication-element 'email email attr))
 
 (defun atom-syndication-element-id (id &rest attr)
   "Return id metadata element.
