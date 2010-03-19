@@ -1,0 +1,12 @@
+# -*- mode: org; -*-
+#
+#+TITLE: Elisp implementation of the atom syndication format.
+#+AUTHOR: David Maus
+#+EMAIL: dmaus@ictsoc.de
+#
+
+* About
+
+  This library implements the atom syndication format as specified in
+  RFC 4287.  It provides a set of functions neccessary to create an
+  atom feed that complies as close as possible to the specs.
