@@ -1,6 +1,7 @@
 ;;; atom-syndication.el --- Elisp implementation of the atom syndication format.
 ;;
 ;; Author: David Maus <dmaus@ictsoc.de>
+;; Keywords: standards, hypermedia
 ;;
 ;; Copyright (C) 2010 by David Maus
 ;;
@@ -21,7 +22,7 @@
 ;;
 ;;; Commentary:
 ;;
-;; == About ==
+;; * About
 ;;
 ;; This library implements the atom syndication format as specified in
 ;; RFC 4287.  It provides a set of functions neccessary to create an
