@@ -268,8 +268,8 @@ Optional parameter EMAIL is the person's email address.
 Optional parameter URI is a uri."
   (concat
    (atom-syndication-element-name name)
-   (when email (atom-syndication-element email))
-   (when uri (atom-syndication-element uri))))
+   (when email (atom-syndication-element 'email email))
+   (when uri (atom-syndication-element 'uri uri))))
 
 (defun atom-syndication-construct-date (date)
   "Return atom date construct for DATE."
