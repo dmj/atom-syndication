@@ -249,7 +249,7 @@ container element."
 
 VALUE is the content.
 Optional argument TYPE is the content type.  If ommited, type
-defaults to \"text\".
+defaults to text.
 Optional argument SRC is the url of the content.
 Optional argument ATTR is an alist of additional attributes."
   (when (and src value)
@@ -259,7 +259,7 @@ Optional argument ATTR is an alist of additional attributes."
     (setq attr (append (list (cons 'type type)) attr)))
   (when src (setq attr (append (list (cons 'src src)) attr)))
   (apply 'atom-syndication-element 'content
-	 (if (member type '("text" "html" "xhtml"))
+	 (if (member type '(text html xhtml))
 	     (atom-syndication-construct-text value type)
 	   (if value (atom-syndication-sanitize value) value))
 	 attr))
@@ -289,18 +289,18 @@ Optional argument URI is a uri."
 (defun atom-syndication-construct-text (text &optional type)
   "Return atom text construct for TEXT.
 
-Optional argument TYPE can be the string \"text\" for plain
-text, \"html\" for html or \"xhtml\" for xhtml content.  If TYPE
+Optional argument TYPE can be the symbol 'text plain
+text, 'html for html or 'xhtml for xhtml content.  If TYPE
 is ommitted it defaults to 'text.  To create html and xhtml
 content the functions in
 `atom-syndication-construct-text-html-function' and
 `atom-syndication-construct-text-xhtml-function' are called."
   (cond
-   ((or (eq type nil) (string= type "text"))
+   ((or (eq type nil) (eq type 'text))
     (atom-syndication-sanitize text))
-   ((or (string= type "html"))
+   ((or (eq type 'html))
     (funcall atom-syndication-construct-text-html-function text))
-   ((or (string= type "xhtml"))
+   ((or (eq type 'xhtml))
     (funcall atom-syndication-construct-text-xhtml-function text))
    (t
     (error "Invalid type for text construct: %s" type))))
@@ -452,7 +452,7 @@ HREF is a string with the link target.
 Optional argument TITLE is the link's title.
 Optional argument REL is a string that indicates the link
 relation type.
-Optional argument TYPE is a string with an advisory media type
+Optional argument TYPE is a symbol of the advisory media type
 of the target.
 Optional argument LENGTH is a string that indicates an advisory
 length of the linked content in octets
@@ -464,7 +464,7 @@ Optional argument ATTR is an alist of atom attributes."
   (when rel
     (setq attr (append (list (cons 'rel rel)) attr)))
   (when type
-    (unless (string-match-p ".+/.+" type)
+    (unless (string-match-p ".+/.+" (format "%s" type))
       (error "Invalid type for link element: %s" type))
     (setq attr (append (list (cons 'type type)) attr)))
   (when length
@@ -540,7 +540,7 @@ cdr."
     (unless
 	(catch 'valid
 	  (mapc '(lambda (pattern)
-		   (when (string-match-p pattern value)
+		   (when (string-match-p pattern (format "%s" value))
 		     (throw 'valid t)))
 		(cdr spec))
 	  nil)
