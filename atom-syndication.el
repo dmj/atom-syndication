@@ -161,7 +161,7 @@ lists are combined and the values are combined using the logical
   'atom-syndication-sanitize
   "Function to create html markup for text constructs.
 
-The function is called with the text as parameter and must return
+The function is called with the text as argument and must return
 the html encoded version with & and < replaced by their html
 entities &amp; and &lt; respectively."
   :group 'atom-syndication
@@ -171,7 +171,7 @@ entities &amp; and &lt; respectively."
   'atom-syndication-simple-xhtml
   "Function to create xhtml markup for text constructs.
 
-The function is called with the text as parameter and must return
+The function is called with the text as argument and must return
 the xhtml encoded version.  For more information on the
 neccessary encoding for xhtml text constructs see RFC4287,
 section 3.1.1.3."
@@ -183,14 +183,14 @@ section 3.1.1.3."
   "Return atom entry element.
 
 ELEMENTS is a list of metadata elements for entry.
-Optional parameter ATTR is an alist with additional attributes."
+Optional argument ATTR is an alist with additional attributes."
   (apply 'atom-syndication-container 'entry elements attr))
 
 (defun atom-syndication-element-feed (elements &rest attr)
   "Return atom feed element.
 
 ELEMENTS is a list of metadata elements for feed.
-Optional parameter ATTR is an alist with additional attributes."
+Optional argument ATTR is an alist with additional attributes."
   (unless (memq (cons 'xmlns "http://www.w3.org/2005/Atom") attr)
     (setq attr (append
 		(list (cons 'xmlns "http://www.w3.org/2005/Atom")) attr)))
@@ -200,7 +200,7 @@ Optional parameter ATTR is an alist with additional attributes."
   "Return atom source element.
 
 ELEMENTS is a list of metadata elements for source.
-Optional parameter ATTR is an alist with additional attributes."
+Optional argument ATTR is an alist with additional attributes."
   (apply 'atom-syndication-container 'source elements attr))
 
 (defun atom-syndication-container (which elements &rest attr)
@@ -209,7 +209,7 @@ Optional parameter ATTR is an alist with additional attributes."
 WHICH is the symbol for the desired container element.
 ELEMENTS is an alist with container's elements, values and
 attributes.
-Optional parameter ATTR is an alist of attributes for the
+Optional argument ATTR is an alist of attributes for the
 container element."
   (let ((spec (assoc which (atom-syndication-combine-alists
 			    atom-syndication-container-spec-alist
@@ -248,7 +248,7 @@ container element."
   "Return atom content element.
 
 VALUE is the content.
-Optional parameter TYPE is the content type.  If ommited, type
+Optional argument TYPE is the content type.  If ommited, type
 defaults to \"text\".
 Optional argument SRC is the url of the content.
 Optional argument ATTR is an alist of additional attributes."
@@ -269,8 +269,8 @@ Optional argument ATTR is an alist of additional attributes."
   "Return atom person construct.
 
 NAME is the name of the person.
-Optional parameter EMAIL is the person's email address.
-Optional parameter URI is a uri."
+Optional argument EMAIL is the person's email address.
+Optional argument URI is a uri."
   (concat
    (atom-syndication-element-name name)
    (when email (atom-syndication-element 'email email))
@@ -289,7 +289,7 @@ Optional parameter URI is a uri."
 (defun atom-syndication-construct-text (text &optional type)
   "Return atom text construct for TEXT.
 
-Optional parameter TYPE can be the string \"text\" for plain
+Optional argument TYPE can be the string \"text\" for plain
 text, \"html\" for html or \"xhtml\" for xhtml content.  If TYPE
 is ommitted it defaults to 'text.  To create html and xhtml
 content the functions in
@@ -310,9 +310,9 @@ content the functions in
   "Return atom author element.
 
 NAME is the name of the author.
-Optional parameter EMAIL is the author's email address.
-Optional parameter URI is a uri.
-Optional parameter ATTR is an alist of additional attribues."
+Optional argument EMAIL is the author's email address.
+Optional argument URI is a uri.
+Optional argument ATTR is an alist of additional attribues."
   (apply 'atom-syndication-element 'author
 	 (atom-syndication-construct-person name email uri)
 	 attr))
@@ -322,9 +322,9 @@ Optional parameter ATTR is an alist of additional attribues."
   "Return atom contributor element.
 
 NAME is the name of the contributor.
-Optional parameter EMAIL is the contributor's email address.
-Optional parameter URI is a uri.
-Optional parameter ATTR is an alist of additional attribues."
+Optional argument EMAIL is the contributor's email address.
+Optional argument URI is a uri.
+Optional argument ATTR is an alist of additional attribues."
   (apply 'atom-syndication-element 'contributor
 	 (atom-syndication-construct-person name email uri)
 	 attr))
@@ -333,7 +333,7 @@ Optional parameter ATTR is an alist of additional attribues."
   "Return summary elment.
 
 SUMMARY is a summary, abstract, or excerpt of an entry.
-Optional parameter ATTR is an alist of additional attributes."
+Optional argument ATTR is an alist of additional attributes."
   (let ((summary (atom-syndication-construct-text
 		  summary (cdr (assoc 'type attr)))))
     (apply 'atom-syndication-element 'summary summary attr)))
@@ -342,7 +342,7 @@ Optional parameter ATTR is an alist of additional attributes."
   "Return subtitle element.
 
 SUBTITLE is a readable description or subtitle for a feed.
-Optional parameter ATTR is an alist of additional attributes."
+Optional argument ATTR is an alist of additional attributes."
   (let ((subtitle (atom-syndication-construct-text
 		   subtitle (cdr (assoc 'type attr)))))
     (apply 'atom-syndication-element 'subtitle subtitle attr)))
@@ -352,7 +352,7 @@ Optional parameter ATTR is an alist of additional attributes."
 
 RIGHTS is a string that that conveys information about rights held
 in and over an entry or feed.
-Optional parameter ATTR is an alist of additional attributes."
+Optional argument ATTR is an alist of additional attributes."
   (let ((rights (atom-construct-text text (cdr (assoc 'type attr)))))
     (apply atom-syndication-element 'rights rights attr)))
 
@@ -360,14 +360,14 @@ Optional parameter ATTR is an alist of additional attributes."
   "Return logo element.
 
 URI is the url pointing to a logo for the feed.
-Optional parameter ATTR is an alist with additional attributes."
+Optional argument ATTR is an alist with additional attributes."
   (apply 'atom-syndication-element 'logo logo attr))
 
 (defun atom-syndication-element-icon (uri &rest attr)
   "Return icon element.
 
 URI is the url pointing to an icon for the feed.
-Optional parameter ATTR is an alist with additional attributes."
+Optional argument ATTR is an alist with additional attributes."
   (apply 'atom-syndication-element 'icon icon attr))
 
 (defun atom-syndication-element-contributor (name
@@ -375,8 +375,8 @@ Optional parameter ATTR is an alist with additional attributes."
   "Return contributer element.
 
 NAME is the name of the contributer.
-Optional parameter EMAIL is the contributor's email address.
-Optional parameter URI is a uri.
+Optional argument EMAIL is the contributor's email address.
+Optional argument URI is a uri.
 Optional argument ATTR is an alist with additional attributes."
   (apply atom-syndication-element 'contributor
 	 (atom-syndication-construct-person name email uri)))
@@ -387,9 +387,9 @@ Optional argument ATTR is an alist with additional attributes."
 
 TERM is a string that identifies the category to which the entry
 or feed belongs.
-Optional parameter SCHEME is an IRI that identifies a
+Optional argument SCHEME is an IRI that identifies a
 categorization scheme.
-Optional parameter LABEL provides a human-readable label for
+Optional argument LABEL provides a human-readable label for
 display in end-user applications.
 Optional argument ATTR is an alist with additional attributes."
   (when scheme (setq attr (append (list (cons 'scheme scheme)) attr)))
@@ -401,7 +401,7 @@ Optional argument ATTR is an alist with additional attributes."
   "Return title metadata element.
 
 TITLE is a string with the title.
-Optional parameter ATTR is an alist of atom attributes."
+Optional argument ATTR is an alist of atom attributes."
   (let ((title (atom-syndication-construct-text
 		title (cdr (assoc 'type attr)))))
     (apply 'atom-syndication-element 'title title attr)))
@@ -426,21 +426,21 @@ Optional paramter ATTR is an alist of atom attributes."
   "Return name metadata element.
 
 NAME is a person's name.
-Optional parameter ATTR is an alist of atom attributes."
+Optional argument ATTR is an alist of atom attributes."
   (apply 'atom-syndication-element 'name name attr))
 
 (defun atom-syndication-element-email (email &rest attr)
   "Return email metadata element.
 
 EMAIL is an email address.
-Optional parameter ATTR is an alist of atom attributes."
+Optional argument ATTR is an alist of atom attributes."
   (apply 'atom-syndication-element 'email email attr))
 
 (defun atom-syndication-element-id (id &rest attr)
   "Return id metadata element.
 
 ID is a string with a unique identifier.
-Optional parameter ATTR is an alist of atom attributes."
+Optional argument ATTR is an alist of atom attributes."
   (apply 'atom-syndication-element 'id id attr))
 
 (defun atom-syndication-element-link (href
@@ -449,16 +449,16 @@ Optional parameter ATTR is an alist of atom attributes."
   "Return link metadata element.
 
 HREF is a string with the link target.
-Optional parameter TITLE is the link's title.
-Optional parameter REL is a string that indicates the link
+Optional argument TITLE is the link's title.
+Optional argument REL is a string that indicates the link
 relation type.
-Optional parameter TYPE is a string with an advisory media type
+Optional argument TYPE is a string with an advisory media type
 of the target.
-Optional parameter LENGTH is a string that indicates an advisory
+Optional argument LENGTH is a string that indicates an advisory
 length of the linked content in octets
-Optional parameter HREFLANG is a string that describes the
+Optional argument HREFLANG is a string that describes the
 language of the resource pointed to by HREF.
-Optional paramater ATTR is an alist of atom attributes."
+Optional argument ATTR is an alist of atom attributes."
   (when title
     (setq attr (append (list (cons 'title title)) attr)))
   (when rel
@@ -479,9 +479,9 @@ Optional paramater ATTR is an alist of atom attributes."
   "Return generator metadata element.
 
 NAME is the name of the generator.
-Optional parameter VERSION is the version string.
-Optional parameter URI is a url.
-Optional paramater ATTR is an alist of atom attributes."
+Optional argument VERSION is the version string.
+Optional argument URI is a url.
+Optional argument ATTR is an alist of atom attributes."
   (when version
     (setq attr (append (list (cons 'version version)) attr)))
   (when uri
