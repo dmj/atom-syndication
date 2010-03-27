@@ -157,7 +157,8 @@ lists are combined and the values are combined using the logical
   :group 'atom-syndication
   :type 'alist)
 
-(defcustom atom-syndication-construct-text-html-function 'atom-syndication-sanitize
+(defcustom atom-syndication-construct-text-html-function
+  'atom-syndication-sanitize
   "Function to create html markup for text constructs.
 
 The function is called with the text as parameter and must return
@@ -166,7 +167,8 @@ entities &amp; and &lt; respectively."
   :group 'atom-syndication
   :type 'function)
 
-(defcustom atom-syndication-construct-text-xhtml-function 'atom-syndication-simple-xhtml
+(defcustom atom-syndication-construct-text-xhtml-function
+  'atom-syndication-simple-xhtml
   "Function to create xhtml markup for text constructs.
 
 The function is called with the text as parameter and must return
@@ -209,12 +211,13 @@ ELEMENTS is an alist with container's elements, values and
 attributes.
 Optional parameter ATTR is an alist of attributes for the
 container element."
-  (let ((spec (assoc which (atom-syndication-combine-alists atom-syndication-container-spec-alist
-							    atom-syndication-container-xtra-alist
-							    '(lambda (a b)
-							       (if (or (eq a nil) (eq a t))
-								   (or a b)
-								 a)))))
+  (let ((spec (assoc which (atom-syndication-combine-alists
+			    atom-syndication-container-spec-alist
+			    atom-syndication-container-xtra-alist
+			    '(lambda (a b)
+			       (if (or (eq a nil) (eq a t))
+				   (or a b)
+				 a)))))
 	value)
     (unless spec
       (error "Invalid atom container element: %s" which))
@@ -245,11 +248,13 @@ container element."
   "Return atom content element.
 
 VALUE is the content.
-Optional parameter TYPE is the content type.  If ommited, type defaults to \"text\".
+Optional parameter TYPE is the content type.  If ommited, type
+defaults to \"text\".
 Optional argument SRC is the url of the content.
 Optional argument ATTR is an alist of additional attributes."
   (when (and src value)
-    (error "Content element with src attribute must be empty: %s, %s" src value))
+    (error "Content element with src attribute must be empty: %s, %s"
+	   src value))
   (when type
     (setq attr (append (list (cons 'type type)) attr)))
   (when src (setq attr (append (list (cons 'src src)) attr)))
@@ -312,7 +317,8 @@ Optional parameter ATTR is an alist of additional attribues."
 	 (atom-syndication-construct-person name email uri)
 	 attr))
 
-(defun atom-syndication-element-contributor (name &optional email uri &rest attr)
+(defun atom-syndication-element-contributor (name
+					     &optional email uri &rest attr)
   "Return atom contributor element.
 
 NAME is the name of the contributor.
@@ -364,7 +370,8 @@ URI is the url pointing to an icon for the feed.
 Optional parameter ATTR is an alist with additional attributes."
   (apply 'atom-syndication-element 'icon icon attr))
 
-(defun atom-syndication-element-contributor (name &optional email uri &rest attr)
+(defun atom-syndication-element-contributor (name
+					     &optional email uri &rest attr)
   "Return contributer element.
 
 NAME is the name of the contributer.
@@ -374,7 +381,8 @@ Optional argument ATTR is an alist with additional attributes."
   (apply atom-syndication-element 'contributor
 	 (atom-syndication-construct-person name email uri)))
 
-(defun atom-syndication-element-category (term &optional scheme label &rest attr)
+(defun atom-syndication-element-category (term
+					  &optional scheme label &rest attr)
   "Return category element.
 
 TERM is a string that identifies the category to which the entry
@@ -394,7 +402,8 @@ Optional argument ATTR is an alist with additional attributes."
 
 TITLE is a string with the title.
 Optional parameter ATTR is an alist of atom attributes."
-  (let ((title (atom-syndication-construct-text title (cdr (assoc 'type attr)))))
+  (let ((title (atom-syndication-construct-text
+		title (cdr (assoc 'type attr)))))
     (apply 'atom-syndication-element 'title title attr)))
 
 (defun atom-syndication-element-updated (datetime &rest attr)
@@ -434,7 +443,9 @@ ID is a string with a unique identifier.
 Optional parameter ATTR is an alist of atom attributes."
   (apply 'atom-syndication-element 'id id attr))
 
-(defun atom-syndication-element-link (href &optional title rel type length hreflang &rest attr)
+(defun atom-syndication-element-link (href
+				      &optional title rel type length hreflang
+				      &rest attr)
   "Return link metadata element.
 
 HREF is a string with the link target.
@@ -463,7 +474,8 @@ Optional paramater ATTR is an alist of atom attributes."
   (setq attr (append (list (cons 'href href)) attr))
   (apply 'atom-syndication-element 'link nil attr))
 
-(defun atom-syndication-element-generator (name &optional version uri &rest attr)
+(defun atom-syndication-element-generator (name
+					   &optional version uri &rest attr)
   "Return generator metadata element.
 
 NAME is the name of the generator.
@@ -480,8 +492,10 @@ Optional paramater ATTR is an alist of atom attributes."
   "Return metadata element string for NAME with VALUE.
 
 ATTR is an alist with atom attributes."
-  (let* ((spec (assoc name (atom-syndication-combine-alists atom-syndication-element-spec-alist
-							    atom-syndication-element-xtra-alist)))
+  (let* ((spec (assoc name
+		      (atom-syndication-combine-alists
+		       atom-syndication-element-spec-alist
+		       atom-syndication-element-xtra-alist)))
 	 (spec_attr (nth 1 spec))
 	 (spec_chkl (nth 2 spec)))
     (unless spec
@@ -518,8 +532,9 @@ ATTR is a cons with the attribute name in car and the value in
 cdr."
   (let* ((name (car attr))
 	 (value (cdr attr))
-	 (spec (assoc name (atom-syndication-combine-alists atom-syndication-attribute-spec-alist
-							    atom-syndication-attribute-xtra-alist))))
+	 (spec (assoc name (atom-syndication-combine-alists
+			    atom-syndication-attribute-spec-alist
+			    atom-syndication-attribute-xtra-alist))))
     (unless spec
       (error "Unknown attribute: %s" name))
     (unless
@@ -558,7 +573,7 @@ in a <xhtml:div> element."
 
 (defun atom-syndication-combine-alists (a b &optional mergefunc)
   "Return combined alist of A and B.
-  
+
 A and B are alists with car as key and one or more lists as
 values in cdr.  The combined list is an alist with all keys of A
 and B.
@@ -595,6 +610,8 @@ lists are not processed but simply appended."
 	(push (cons key def_a) list_c)))
     (setq list_c (append list_b list_c))
     list_c))
+
+(eval-when-compile (require 'cl))
 
 (provide 'atom-syndication)
 
