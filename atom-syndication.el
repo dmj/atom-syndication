@@ -531,7 +531,7 @@ ATTR is an alist with atom attributes."
 ATTR is a cons with the attribute name in car and the value in
 cdr."
   (let* ((name (car attr))
-	 (value (cdr attr))
+	 (value (format "%s" (cdr attr)))
 	 (spec (assoc name (atom-syndication-combine-alists
 			    atom-syndication-attribute-spec-alist
 			    atom-syndication-attribute-xtra-alist))))
@@ -540,13 +540,12 @@ cdr."
     (unless
 	(catch 'valid
 	  (mapc '(lambda (pattern)
-		   (when (string-match-p pattern (format "%s" value))
+		   (when (string-match-p pattern value)
 		     (throw 'valid t)))
 		(cdr spec))
 	  nil)
       (error "Invalid attribute value: %s, %s" value name))
-    (concat
-     (symbol-name name) "=\"" (atom-syndication-sanitize value) "\"")))
+    (format "%s=\"%s\"" name (atom-syndication-sanitize value))))
 
 ;;;; Misc functions
 (defun atom-syndication-sanitize (text)
