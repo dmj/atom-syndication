@@ -179,14 +179,14 @@ section 3.1.1.3."
   :type 'function)
 
 ;;;; atom container elements
-(defun atom-syndication-element-entry (elements &rest attr)
+(defun atom-syndication-element-entry (attr elements)
   "Return atom entry element.
 
 ELEMENTS is a list of metadata elements for entry.
 Optional argument ATTR is an alist with additional attributes."
-  (apply 'atom-syndication-container 'entry elements attr))
+  (atom-syndication-container 'entry attr elements))
 
-(defun atom-syndication-element-feed (elements &rest attr)
+(defun atom-syndication-element-feed (attr elements)
   "Return atom feed element.
 
 ELEMENTS is a list of metadata elements for feed.
@@ -194,16 +194,16 @@ Optional argument ATTR is an alist with additional attributes."
   (unless (memq (cons 'xmlns "http://www.w3.org/2005/Atom") attr)
     (setq attr (append
 		(list (cons 'xmlns "http://www.w3.org/2005/Atom")) attr)))
-  (apply 'atom-syndication-container 'feed elements attr))
+  (atom-syndication-container 'feed attr elements))
 
-(defun atom-syndication-element-source (elements &rest attr)
+(defun atom-syndication-element-source (attr elements)
   "Return atom source element.
 
 ELEMENTS is a list of metadata elements for source.
 Optional argument ATTR is an alist with additional attributes."
   (apply 'atom-syndication-container 'source elements attr))
 
-(defun atom-syndication-container (which elements &rest attr)
+(defun atom-syndication-container (which attr elements)
   "Return atom container.
 
 WHICH is the symbol for the desired container element.
@@ -233,18 +233,11 @@ container element."
 	  (error "Too much elements for container: %s, %s"
 		 (car spec_elm) which))))
     ;; create container
-    (apply 'atom-syndication-element which
-	   (mapconcat '(lambda (element)
-			 (let* ((name (car element))
-				(value (delq name element)))
-			   (apply 'funcall
-				  (intern
-				   (format "atom-syndication-element-%s" name))
-				  value))
-			 ) elements "\n")
-	   attr)))
+    ;; FIXME
+    (atom-syndication-element which attr elements)))
 
-(defun atom-syndication-element-content (value &optional type src &rest attr)
+(defun atom-syndication-element-content (attr value
+					      &optional type src)
   "Return atom content element.
 
 VALUE is the content.
@@ -258,11 +251,11 @@ Optional argument ATTR is an alist of additional attributes."
   (when type
     (setq attr (append (list (cons 'type type)) attr)))
   (when src (setq attr (append (list (cons 'src src)) attr)))
-  (apply 'atom-syndication-element 'content
+  (atom-syndication-element 'content
+	 attr
 	 (if (member type '(text html xhtml))
 	     (atom-syndication-construct-text value type)
-	   (if value (atom-syndication-sanitize value) value))
-	 attr))
+	   (if value (atom-syndication-sanitize value) value))))
 
 ;;;; atom constructs
 (defun atom-syndication-construct-person (name &optional email uri)
@@ -306,83 +299,84 @@ content the functions in
     (error "Invalid type for text construct: %s" type))))
 
 ;;;; atom metadata elements
-(defun atom-syndication-element-author (name &optional email uri &rest attr)
+(defun atom-syndication-element-author (attr name &optional email uri)
   "Return atom author element.
 
 NAME is the name of the author.
 Optional argument EMAIL is the author's email address.
 Optional argument URI is a uri.
 Optional argument ATTR is an alist of additional attribues."
-  (apply 'atom-syndication-element 'author
-	 (atom-syndication-construct-person name email uri)
-	 attr))
+  (atom-syndication-element 'author
+	 attr
+	 (atom-syndication-construct-person name email uri)))
 
-(defun atom-syndication-element-contributor (name
-					     &optional email uri &rest attr)
+(defun atom-syndication-element-contributor (attr name
+					     &optional email uri)
   "Return atom contributor element.
 
 NAME is the name of the contributor.
 Optional argument EMAIL is the contributor's email address.
 Optional argument URI is a uri.
 Optional argument ATTR is an alist of additional attribues."
-  (apply 'atom-syndication-element 'contributor
-	 (atom-syndication-construct-person name email uri)
-	 attr))
+  (atom-syndication-element 'contributor
+	 attr
+	 (atom-syndication-construct-person name email uri)))
 
-(defun atom-syndication-element-summary (summary &rest attr)
+(defun atom-syndication-element-summary (attr summary)
   "Return summary elment.
 
 SUMMARY is a summary, abstract, or excerpt of an entry.
 Optional argument ATTR is an alist of additional attributes."
   (let ((summary (atom-syndication-construct-text
 		  summary (cdr (assoc 'type attr)))))
-    (apply 'atom-syndication-element 'summary summary attr)))
+    (atom-syndication-element 'summary attr summary)))
 
-(defun atom-syndication-element-subtitle (subtitle &rest attr)
+(defun atom-syndication-element-subtitle (attr subtitle)
   "Return subtitle element.
 
 SUBTITLE is a readable description or subtitle for a feed.
 Optional argument ATTR is an alist of additional attributes."
   (let ((subtitle (atom-syndication-construct-text
 		   subtitle (cdr (assoc 'type attr)))))
-    (apply 'atom-syndication-element 'subtitle subtitle attr)))
+    (atom-syndication-element 'subtitle attr subtitle)))
 
-(defun atom-syndication-element-rights (rights &rest attr)
+(defun atom-syndication-element-rights (attr rights)
   "Return rights element.
 
 RIGHTS is a string that that conveys information about rights held
 in and over an entry or feed.
 Optional argument ATTR is an alist of additional attributes."
   (let ((rights (atom-construct-text text (cdr (assoc 'type attr)))))
-    (apply atom-syndication-element 'rights rights attr)))
+    (atom-syndication-element 'rights rights attr)))
 
-(defun atom-syndication-element-logo (uri &rest attr)
+(defun atom-syndication-element-logo (attr uri)
   "Return logo element.
 
 URI is the url pointing to a logo for the feed.
 Optional argument ATTR is an alist with additional attributes."
-  (apply 'atom-syndication-element 'logo logo attr))
+  (atom-syndication-element 'logo attr logo))
 
-(defun atom-syndication-element-icon (uri &rest attr)
+(defun atom-syndication-element-icon (attr uri)
   "Return icon element.
 
 URI is the url pointing to an icon for the feed.
 Optional argument ATTR is an alist with additional attributes."
-  (apply 'atom-syndication-element 'icon icon attr))
+  (atom-syndication-element 'icon attr icon))
 
-(defun atom-syndication-element-contributor (name
-					     &optional email uri &rest attr)
+(defun atom-syndication-element-contributor (attr name
+					     &optional email uri)
   "Return contributer element.
 
 NAME is the name of the contributer.
 Optional argument EMAIL is the contributor's email address.
 Optional argument URI is a uri.
 Optional argument ATTR is an alist with additional attributes."
-  (apply atom-syndication-element 'contributor
-	 (atom-syndication-construct-person name email uri)))
+  (atom-syndication-element 'contributor
+			    attr
+			    (atom-syndication-construct-person name email uri)))
 
-(defun atom-syndication-element-category (term
-					  &optional scheme label &rest attr)
+(defun atom-syndication-element-category (attr term
+					  &optional scheme label)
   "Return category element.
 
 TERM is a string that identifies the category to which the entry
@@ -395,57 +389,56 @@ Optional argument ATTR is an alist with additional attributes."
   (when scheme (setq attr (append (list (cons 'scheme scheme)) attr)))
   (when label (setq attr (append (list (cons 'label label)) attr)))
   (setq attr (append (list (cons 'term term)) attr))
-  (apply 'atom-syndication-element 'category nil attr))
+  (atom-syndication-element 'category attr nil))
 
-(defun atom-syndication-element-title (title &rest attr)
+(defun atom-syndication-element-title (attr title)
   "Return title metadata element.
 
 TITLE is a string with the title.
 Optional argument ATTR is an alist of atom attributes."
   (let ((title (atom-syndication-construct-text
 		title (cdr (assoc 'type attr)))))
-    (apply 'atom-syndication-element 'title title attr)))
+    (atom-syndication-element 'title attr title)))
 
-(defun atom-syndication-element-updated (datetime &rest attr)
+(defun atom-syndication-element-updated (attr datetime)
   "Return updated metadata element.
 
 DATETIME is a elisp time object.
 Optional paramter ATTR is an alist of atom attributes."
   (let ((updated (atom-syndication-construct-date datetime)))
-    (apply 'atom-syndication-element 'updated updated attr)))
+    (atom-syndication-element 'updated attr updated)))
 
-(defun atom-syndication-element-published (datetime &rest attr)
+(defun atom-syndication-element-published (attr datetime)
   "Return published metadata element.
 
 DATETIME is a elisp time object.
 Optional paramter ATTR is an alist of atom attributes."
   (let ((published (atom-syndication-construct-date datetime)))
-    (apply 'atom-syndication-element 'published published attr)))
+    (atom-syndication-element 'published attr published)))
 
-(defun atom-syndication-element-name (name &rest attr)
+(defun atom-syndication-element-name (attr name)
   "Return name metadata element.
 
 NAME is a person's name.
 Optional argument ATTR is an alist of atom attributes."
-  (apply 'atom-syndication-element 'name name attr))
+  (atom-syndication-element 'name attr name))
 
-(defun atom-syndication-element-email (email &rest attr)
+(defun atom-syndication-element-email (attr email)
   "Return email metadata element.
 
 EMAIL is an email address.
 Optional argument ATTR is an alist of atom attributes."
-  (apply 'atom-syndication-element 'email email attr))
+  (atom-syndication-element 'email attr email))
 
-(defun atom-syndication-element-id (id &rest attr)
+(defun atom-syndication-element-id (attr id &rest)
   "Return id metadata element.
 
 ID is a string with a unique identifier.
 Optional argument ATTR is an alist of atom attributes."
-  (apply 'atom-syndication-element 'id id attr))
+  (atom-syndication-element 'id attr id))
 
-(defun atom-syndication-element-link (href
-				      &optional title rel type length hreflang
-				      &rest attr)
+(defun atom-syndication-element-link (attr href
+				      &optional title rel type length hreflang)
   "Return link metadata element.
 
 HREF is a string with the link target.
@@ -472,10 +465,10 @@ Optional argument ATTR is an alist of atom attributes."
   (when hreflang
     (setq attr (append (list (cons 'hreflang hreflang)) attr)))
   (setq attr (append (list (cons 'href href)) attr))
-  (apply 'atom-syndication-element 'link nil attr))
+  (atom-syndication-element 'link attr nil))
 
-(defun atom-syndication-element-generator (name
-					   &optional version uri &rest attr)
+(defun atom-syndication-element-generator (attr name
+					   &optional version uri)
   "Return generator metadata element.
 
 NAME is the name of the generator.
@@ -486,12 +479,15 @@ Optional argument ATTR is an alist of atom attributes."
     (setq attr (append (list (cons 'version version)) attr)))
   (when uri
     (setq attr (append (list (cons 'uri uri)) attr)))
-  (apply 'atom-syndication-element 'generator name attr))
+  (atom-syndication-element 'generator attr name))
 
-(defun atom-syndication-element (name value &rest attr)
-  "Return metadata element string for NAME with VALUE.
+(defun atom-syndication-element (name attr &optional value)
+  "Return metadata element string.
 
-ATTR is an alist with atom attributes."
+NAME is symbol of element name.
+ATTR is a list of cons with atom attributes, key in car and value
+in cdr.
+VALUE is string or symbol with element value."
   (let* ((spec (assoc name
 		      (atom-syndication-combine-alists
 		       atom-syndication-element-spec-alist
@@ -506,22 +502,32 @@ ATTR is an alist with atom attributes."
 	(unless (memq (car a) spec_attr)
 	  (error "Invalid attribute for element: %s, %s" (car a) name))))
     ;; check value
-    (unless
-	(if (eq spec_chkl nil) (eq value nil)
-	  (catch 'valid
-	    (mapc '(lambda (pattern)
-		     (when (string-match-p pattern (or value ""))
-		       (throw 'valid t)))
-		  spec_chkl)
-	    nil))
-      (error "Invalid value for element: %s, %s" value name))
+    (when (stringp value)
+      (unless
+	  (if (eq spec_chkl nil) (eq value nil)
+	    (catch 'valid
+	      (mapc '(lambda (pattern)
+		       (when (string-match-p pattern (or value ""))
+			 (throw 'valid t)))
+		    spec_chkl)
+	      nil))
+	(error "Invalid value for element: %s, %s" value name)))
     (concat
      "<" (symbol-name name)
      (if attr (concat
 	       " "
 	       (mapconcat 'atom-syndication-attribute attr " ")))
      (if value
-	 (concat ">" value "</" (symbol-name name))
+	 (concat ">"
+		 (if (stringp value) value
+		   (mapconcat
+		    '(lambda (v)
+		       (apply
+			(intern
+			 (format "atom-syndication-element-%s"
+				 (car v)))
+			(cdr v))) value ""))
+		 "</" (symbol-name name))
        " /")
      ">")))
 
