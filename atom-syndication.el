@@ -29,6 +29,10 @@
 ;; atom feed that complies as close as possible to the specs.
 ;;
 ;;; Code:
+
+(eval-when-compile
+  (require 'cl))
+
 (defconst atom-syndication-attribute-spec-alist
   '((href . (".+"))
     (hreflang . ("^[[:alpha:]]\\{1,8\\}\\(-[[:alnum:]]\\{1,8\\}\\)*$"))
@@ -178,6 +182,14 @@ section 3.1.1.3."
   :group 'atom-syndication
   :type 'function)
 
+(defun atom-syndication-syndicate (list)
+  "Return atom document.
+
+LIST is a list with atom elements."
+;  (apply 'atom-syndication-element (car list) (cdr list))
+  (apply (intern (format "atom-syndication-element-%s" (car list)))
+	 (cdr list)))
+
 ;;;; atom container elements
 (defun atom-syndication-element-entry (attr elements)
   "Return atom entry element.
@@ -233,18 +245,17 @@ container element."
 	  (error "Too much elements for container: %s, %s"
 		 (car spec_elm) which))))
     ;; create container
-    ;; FIXME
     (atom-syndication-element which attr elements)))
 
 (defun atom-syndication-element-content (attr value
 					      &optional type src)
   "Return atom content element.
 
+ATTR is a list of cons with element attributes.
 VALUE is the content.
 Optional argument TYPE is the content type.  If ommited, type
 defaults to text.
-Optional argument SRC is the url of the content.
-Optional argument ATTR is an alist of additional attributes."
+Optional argument SRC is the url of the content."
   (when (and src value)
     (error "Content element with src attribute must be empty: %s, %s"
 	   src value))
@@ -487,7 +498,7 @@ Optional argument ATTR is an alist of atom attributes."
 NAME is symbol of element name.
 ATTR is a list of cons with atom attributes, key in car and value
 in cdr.
-VALUE is string or symbol with element value."
+Optional argument VALUE is string or symbol with element value."
   (let* ((spec (assoc name
 		      (atom-syndication-combine-alists
 		       atom-syndication-element-spec-alist
@@ -615,8 +626,6 @@ lists are not processed but simply appended."
 	(push (cons key def_a) list_c)))
     (setq list_c (append list_b list_c))
     list_c))
-
-(eval-when-compile (require 'cl))
 
 (provide 'atom-syndication)
 
