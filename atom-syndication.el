@@ -186,7 +186,6 @@ section 3.1.1.3."
   "Return atom document.
 
 LIST is a list with atom elements."
-;  (apply 'atom-syndication-element (car list) (cdr list))
   (apply (intern (format "atom-syndication-element-%s" (car list)))
 	 (cdr list)))
 
@@ -194,15 +193,15 @@ LIST is a list with atom elements."
 (defun atom-syndication-element-entry (attr elements)
   "Return atom entry element.
 
-ELEMENTS is a list of metadata elements for entry.
-Optional argument ATTR is an alist with additional attributes."
+ATTR is a list of cons with xml attributes.
+ELEMENTS is a list of metadata elements for entry."
   (atom-syndication-container 'entry attr elements))
 
 (defun atom-syndication-element-feed (attr elements)
   "Return atom feed element.
 
-ELEMENTS is a list of metadata elements for feed.
-Optional argument ATTR is an alist with additional attributes."
+ATTR is a list of cons with xml attributes.
+ELEMENTS is a list of metadata elements for feed."
   (unless (memq (cons 'xmlns "http://www.w3.org/2005/Atom") attr)
     (setq attr (append
 		(list (cons 'xmlns "http://www.w3.org/2005/Atom")) attr)))
@@ -211,18 +210,17 @@ Optional argument ATTR is an alist with additional attributes."
 (defun atom-syndication-element-source (attr elements)
   "Return atom source element.
 
-ELEMENTS is a list of metadata elements for source.
-Optional argument ATTR is an alist with additional attributes."
-  (apply 'atom-syndication-container 'source elements attr))
+ATTR is a list of cons with xml attributes.
+ELEMENTS is a list of metadata elements for source."
+  (apply 'atom-syndication-container 'source attr elements))
 
 (defun atom-syndication-container (which attr elements)
   "Return atom container.
 
 WHICH is the symbol for the desired container element.
+ATTR is a list of cons with xml attributes.
 ELEMENTS is an alist with container's elements, values and
-attributes.
-Optional argument ATTR is an alist of attributes for the
-container element."
+attributes."
   (let ((spec (assoc which (atom-syndication-combine-alists
 			    atom-syndication-container-spec-alist
 			    atom-syndication-container-xtra-alist
@@ -256,17 +254,20 @@ VALUE is the content.
 Optional argument TYPE is the content type.  If ommited, type
 defaults to text.
 Optional argument SRC is the url of the content."
-  (when (and src value)
-    (error "Content element with src attribute must be empty: %s, %s"
-	   src value))
-  (when type
-    (setq attr (append (list (cons 'type type)) attr)))
-  (when src (setq attr (append (list (cons 'src src)) attr)))
-  (atom-syndication-element 'content
-	 attr
-	 (if (member type '(text html xhtml))
-	     (atom-syndication-construct-text value type)
-	   (if value (atom-syndication-sanitize value) value))))
+  (let ((type (or type (cdr (assoc 'type attr)) 'text))
+	(src (or src (cdr (assoc 'src attr)))))
+    (when (and src value)
+      (error "Content element with src attribute must be empty: %s, %s"
+	     src value))
+    (unless (assoc 'type attr)
+      (setq attr (append (list (cons 'type type)) attr)))
+    (unless (or (assoc 'src attr) (not src))
+      (setq attr (append (list (cons 'src src)) attr)))
+    (atom-syndication-element 'content
+			      attr
+			      (if (member type '(text html xhtml))
+				  (atom-syndication-construct-text value type)
+				(if value (atom-syndication-sanitize value) value)))))
 
 ;;;; atom constructs
 (defun atom-syndication-construct-person (name &optional email uri)
@@ -276,9 +277,9 @@ NAME is the name of the person.
 Optional argument EMAIL is the person's email address.
 Optional argument URI is a uri."
   (concat
-   (atom-syndication-element-name name)
-   (when email (atom-syndication-element 'email email))
-   (when uri (atom-syndication-element 'uri uri))))
+   (atom-syndication-element-name nil name)
+   (when email (atom-syndication-element 'email nil email))
+   (when uri (atom-syndication-element 'uri nil uri))))
 
 (defun atom-syndication-construct-date (date)
   "Return atom date construct for DATE."
