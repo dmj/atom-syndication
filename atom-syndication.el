@@ -267,7 +267,8 @@ Optional argument SRC is the url of the content."
 			      attr
 			      (if (member type '(text html xhtml))
 				  (atom-syndication-construct-text value type)
-				(if value (atom-syndication-sanitize value) value)))))
+				(if value
+				    (atom-syndication-sanitize value) value)))))
 
 ;;;; atom constructs
 (defun atom-syndication-construct-person (name &optional email uri)
@@ -314,10 +315,10 @@ content the functions in
 (defun atom-syndication-element-author (attr name &optional email uri)
   "Return atom author element.
 
+ATTR is a list of cons with xml attributes.
 NAME is the name of the author.
 Optional argument EMAIL is the author's email address.
-Optional argument URI is a uri.
-Optional argument ATTR is an alist of additional attribues."
+Optional argument URI is a uri."
   (atom-syndication-element 'author
 	 attr
 	 (atom-syndication-construct-person name email uri)))
@@ -326,10 +327,10 @@ Optional argument ATTR is an alist of additional attribues."
 					     &optional email uri)
   "Return atom contributor element.
 
+ATTR is a list of cons with xml attributes.
 NAME is the name of the contributor.
 Optional argument EMAIL is the contributor's email address.
-Optional argument URI is a uri.
-Optional argument ATTR is an alist of additional attribues."
+Optional argument URI is a uri."
   (atom-syndication-element 'contributor
 	 attr
 	 (atom-syndication-construct-person name email uri)))
@@ -337,8 +338,8 @@ Optional argument ATTR is an alist of additional attribues."
 (defun atom-syndication-element-summary (attr summary)
   "Return summary elment.
 
-SUMMARY is a summary, abstract, or excerpt of an entry.
-Optional argument ATTR is an alist of additional attributes."
+ATTR is a list of cons with xml attributes.
+SUMMARY is a summary, abstract, or excerpt of an entry."
   (let ((summary (atom-syndication-construct-text
 		  summary (cdr (assoc 'type attr)))))
     (atom-syndication-element 'summary attr summary)))
@@ -346,8 +347,8 @@ Optional argument ATTR is an alist of additional attributes."
 (defun atom-syndication-element-subtitle (attr subtitle)
   "Return subtitle element.
 
-SUBTITLE is a readable description or subtitle for a feed.
-Optional argument ATTR is an alist of additional attributes."
+ATTR is a list of cons with xml attributes.
+SUBTITLE is a readable description or subtitle for a feed."
   (let ((subtitle (atom-syndication-construct-text
 		   subtitle (cdr (assoc 'type attr)))))
     (atom-syndication-element 'subtitle attr subtitle)))
@@ -355,34 +356,34 @@ Optional argument ATTR is an alist of additional attributes."
 (defun atom-syndication-element-rights (attr rights)
   "Return rights element.
 
+ATTR is a list of cons with xml attributes.
 RIGHTS is a string that that conveys information about rights held
-in and over an entry or feed.
-Optional argument ATTR is an alist of additional attributes."
+in and over an entry or feed."
   (let ((rights (atom-construct-text text (cdr (assoc 'type attr)))))
     (atom-syndication-element 'rights rights attr)))
 
 (defun atom-syndication-element-logo (attr uri)
   "Return logo element.
 
-URI is the url pointing to a logo for the feed.
-Optional argument ATTR is an alist with additional attributes."
+ATTR is a list of cons with xml attributes.
+URI is the url pointing to a logo for the feed."
   (atom-syndication-element 'logo attr logo))
 
 (defun atom-syndication-element-icon (attr uri)
   "Return icon element.
 
-URI is the url pointing to an icon for the feed.
-Optional argument ATTR is an alist with additional attributes."
+ATTR is a list of cons with xml attributes.
+URI is the url pointing to an icon for the feed."
   (atom-syndication-element 'icon attr icon))
 
 (defun atom-syndication-element-contributor (attr name
 					     &optional email uri)
   "Return contributer element.
 
+ATTR is a list of cons with xml attributes.
 NAME is the name of the contributer.
 Optional argument EMAIL is the contributor's email address.
-Optional argument URI is a uri.
-Optional argument ATTR is an alist with additional attributes."
+Optional argument URI is a uri."
   (atom-syndication-element 'contributor
 			    attr
 			    (atom-syndication-construct-person name email uri)))
@@ -391,13 +392,13 @@ Optional argument ATTR is an alist with additional attributes."
 					  &optional scheme label)
   "Return category element.
 
+ATTR is a list of cons with xml attributes.
 TERM is a string that identifies the category to which the entry
 or feed belongs.
 Optional argument SCHEME is an IRI that identifies a
 categorization scheme.
 Optional argument LABEL provides a human-readable label for
-display in end-user applications.
-Optional argument ATTR is an alist with additional attributes."
+display in end-user applications."
   (when scheme (setq attr (append (list (cons 'scheme scheme)) attr)))
   (when label (setq attr (append (list (cons 'label label)) attr)))
   (setq attr (append (list (cons 'term term)) attr))
@@ -406,8 +407,8 @@ Optional argument ATTR is an alist with additional attributes."
 (defun atom-syndication-element-title (attr title)
   "Return title metadata element.
 
-TITLE is a string with the title.
-Optional argument ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+TITLE is a string with the title."
   (let ((title (atom-syndication-construct-text
 		title (cdr (assoc 'type attr)))))
     (atom-syndication-element 'title attr title)))
@@ -415,44 +416,45 @@ Optional argument ATTR is an alist of atom attributes."
 (defun atom-syndication-element-updated (attr datetime)
   "Return updated metadata element.
 
-DATETIME is a elisp time object.
-Optional paramter ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+DATETIME is a elisp time object."
   (let ((updated (atom-syndication-construct-date datetime)))
     (atom-syndication-element 'updated attr updated)))
 
 (defun atom-syndication-element-published (attr datetime)
   "Return published metadata element.
 
-DATETIME is a elisp time object.
-Optional paramter ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+DATETIME is a elisp time object."
   (let ((published (atom-syndication-construct-date datetime)))
     (atom-syndication-element 'published attr published)))
 
 (defun atom-syndication-element-name (attr name)
   "Return name metadata element.
 
-NAME is a person's name.
-Optional argument ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+NAME is a person's name."
   (atom-syndication-element 'name attr name))
 
 (defun atom-syndication-element-email (attr email)
   "Return email metadata element.
 
-EMAIL is an email address.
-Optional argument ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+EMAIL is an email address."
   (atom-syndication-element 'email attr email))
 
-(defun atom-syndication-element-id (attr id &rest)
+(defun atom-syndication-element-id (attr id)
   "Return id metadata element.
 
-ID is a string with a unique identifier.
-Optional argument ATTR is an alist of atom attributes."
+ATTR is a list of cons with xml attributes.
+ID is a string with a unique identifier."
   (atom-syndication-element 'id attr id))
 
 (defun atom-syndication-element-link (attr href
 				      &optional title rel type length hreflang)
   "Return link metadata element.
 
+ATTR is a list of cons with xml attributes.
 HREF is a string with the link target.
 Optional argument TITLE is the link's title.
 Optional argument REL is a string that indicates the link
@@ -462,8 +464,7 @@ of the target.
 Optional argument LENGTH is a string that indicates an advisory
 length of the linked content in octets
 Optional argument HREFLANG is a string that describes the
-language of the resource pointed to by HREF.
-Optional argument ATTR is an alist of atom attributes."
+language of the resource pointed to by HREF."
   (when title
     (setq attr (append (list (cons 'title title)) attr)))
   (when rel
@@ -483,10 +484,10 @@ Optional argument ATTR is an alist of atom attributes."
 					   &optional version uri)
   "Return generator metadata element.
 
+ATTR is a list of cons with xml attributes.
 NAME is the name of the generator.
 Optional argument VERSION is the version string.
-Optional argument URI is a url.
-Optional argument ATTR is an alist of atom attributes."
+Optional argument URI is a url."
   (when version
     (setq attr (append (list (cons 'version version)) attr)))
   (when uri
