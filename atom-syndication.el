@@ -1,6 +1,6 @@
-;;; atom-syndication.el --- Elisp implementation of the atom syndication format.
+;;; atom-syndication.el --- Elisp implementation of the atom syndication format
 ;;
-;; Author: David Maus <dmaus@ictsoc.de>
+;; Author: David Maus <dmaus [at] ictsoc.de>
 ;; Keywords: standards, hypermedia
 ;;
 ;; Copyright (C) 2010 by David Maus
@@ -268,7 +268,8 @@ Optional argument SRC is the url of the content."
 			      (if (member type '(text html xhtml))
 				  (atom-syndication-construct-text value type)
 				(if value
-				    (atom-syndication-sanitize value) value)))))
+				    (atom-syndication-sanitize value)
+				  value)))))
 
 ;;;; atom constructs
 (defun atom-syndication-construct-person (name &optional email uri)
@@ -386,7 +387,8 @@ Optional argument EMAIL is the contributor's email address.
 Optional argument URI is a uri."
   (atom-syndication-element 'contributor
 			    attr
-			    (atom-syndication-construct-person name email uri)))
+			    (atom-syndication-construct-person
+			     name email uri)))
 
 (defun atom-syndication-element-category (attr term
 					  &optional scheme label)
