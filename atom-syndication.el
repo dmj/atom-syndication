@@ -50,7 +50,7 @@
 ;;              (entry nil
 ;;                     ((title nil "This is an entry")
 ;;                      (id nil "d11e07e2-127f-4789-ab17-1bc2d6c80e28")
-;;                      (updated nil ,(current-time)))))))
+;;                      (updated nil ,(current-time))))))
 ;;
 ;;   And calling `atom-syndication-syndicate' with this list as argument
 ;;   returns a string with the corresponding feed:
