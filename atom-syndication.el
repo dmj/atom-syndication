@@ -23,11 +23,79 @@
 ;;; Commentary:
 ;;
 ;; * About
+
+;;   This library implements the atom syndication format as specified in
+;;   RFC 4287.  It provides a set of functions neccessary to create an
+;;   atom feed that complies as close as possible to the specs.
 ;;
-;; This library implements the atom syndication format as specified in
-;; RFC 4287.  It provides a set of functions neccessary to create an
-;; atom feed that complies as close as possible to the specs.
+;; * Usage
 ;;
+;;   The structure of an Atom document is represented in a list of the
+;;   format:
+;;
+;;   (ELEMENT ATTR VAL [VAL;VAL;VAL])
+;;
+;;   Where ELEMENT is a symbol with the element's name, ATTR is a list of
+;;   cons with XML attributes (might be empty) and VAL are mandatory and
+;;   optional values of the element.  For elements which contain other
+;;   atom elements (i.e. /containers/: feed, entry, and source) the first
+;;   value is expected to be a list with those elements.
+;;
+;;   Hence a simple feed would be represented as:
+;;
+;;      `(feed nil
+;;             ((title nil "This is an exmaple feed")
+;;              (updated nil ,(current-time))
+;;              (id nil "376c73f3-8483-44d8-9d3e-8da7cba0ebf1")
+;;              (entry nil
+;;                     ((title nil "This is an entry")
+;;                      (id nil "d11e07e2-127f-4789-ab17-1bc2d6c80e28")
+;;                      (updated nil ,(current-time)))))))
+;;
+;;   And calling `atom-syndication-syndicate' with this list as argument
+;;   returns a string with the corresponding feed:
+;;
+;;     <feed xmlns=\"http://www.w3.org/2005/Atom\">
+;;       <title>This is an exmaple feed</title>
+;;       <updated>2010-04-19T16:28:10+02:00</updated>
+;;       <id>376c73f3-8483-44d8-9d3e-8da7cba0ebf1</id>
+;;       <entry>
+;;         <title>This is an entry</title>
+;;         <id>d11e07e2-127f-4789-ab17-1bc2d6c80e28</id>
+;;         <updated>2010-04-19T16:28:10+02:00</updated>
+;;       </entry>
+;;     </feed>
+;;
+;; * Elements with optional values
+;;
+;;   While in the specifications there is a clear distinction of which
+;;   values of a element are stored as XML attributes and which are
+;;   stored as contained data atom-syndication.el does not require a user
+;;   of the library to look up which element values are in fact
+;;   attributes and which are not.
+;;
+;;   This means that for example the atom generatore element
+;;
+;;     <generator version="1.0" uri="http://example.tld">Example Generator</generator>
+;;
+;;   Can be represented in two ways: Using the version and the uri
+;;   property as fourth and fifth element of the element list or
+;;   explicitly specifying them as XML attributes:
+;;
+;;     (generator nil "Example Generator" "1.0" "http://example.tld")
+;;
+;;   Is equivalent to
+;;
+;;     (generator ((version . "1.0") (url . "http://example.tld")) "Example Generator")
+;;
+;; * Compliance
+;;
+;;   To achieve compliance with the specifications of RFC 4287
+;;   atom-syndication.el implements checks for the validity of a element
+;;   values and container elements and throws an error if it detects
+;;   something that is assumed to be a violation of the specs.
+;;
+
 ;;; Code:
 
 (eval-when-compile
@@ -602,7 +670,7 @@ Optional argument MERGEFUNC is the symbol of a function that
 merges the values of the value lists.  The function must take the
 two values as arguments and return whatever should be considered
 a merge of the values.  All values of the value lists in A and B
-are processed sequentially. missing values are passed as the
+are processed sequentially.  Missing values are passed as the
 symbol nil to MERGEFUNC.  If MERGEFUNC is ommitted, the the value
 lists are not processed but simply appended."
   (let ((list_a (copy-alist a))
