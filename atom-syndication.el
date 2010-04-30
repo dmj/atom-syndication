@@ -25,7 +25,7 @@
 ;; * About
 
 ;;   This library implements the atom syndication format as specified in
-;;   RFC 4287.  It provides a set of functions neccessary to create an
+;;   RFC 4287.  It provides a set of functions necessary to create an
 ;;   atom feed that complies as close as possible to the specs.
 ;;
 ;; * Usage
@@ -44,7 +44,7 @@
 ;;   Hence a simple feed would be represented as:
 ;;
 ;;      `(feed nil
-;;             ((title nil "This is an exmaple feed")
+;;             ((title nil "This is an example feed")
 ;;              (updated nil ,(current-time))
 ;;              (id nil "376c73f3-8483-44d8-9d3e-8da7cba0ebf1")
 ;;              (entry nil
@@ -56,7 +56,7 @@
 ;;   returns a string with the corresponding feed:
 ;;
 ;;     <feed xmlns=\"http://www.w3.org/2005/Atom\">
-;;       <title>This is an exmaple feed</title>
+;;       <title>This is an example feed</title>
 ;;       <updated>2010-04-19T16:28:10+02:00</updated>
 ;;       <id>376c73f3-8483-44d8-9d3e-8da7cba0ebf1</id>
 ;;       <entry>
@@ -74,7 +74,7 @@
 ;;   of the library to look up which element values are in fact
 ;;   attributes and which are not.
 ;;
-;;   This means that for example the atom generatore element
+;;   This means that for example the atom generator element
 ;;
 ;;     <generator version="1.0" uri="http://example.tld">Example Generator</generator>
 ;;
