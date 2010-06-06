@@ -22,79 +22,105 @@
 ;;
 ;;; Commentary:
 ;;
-;; * About
-
-;;   This library implements the atom syndication format as specified in
-;;   RFC 4287.  It provides a set of functions necessary to create an
-;;   atom feed that complies as close as possible to the specs.
+;; 1 About
+;; ~~~~~~~~
 ;;
-;; * Usage
+;; =atom-syndication.el= is an elisp implementation of the Atom
+;; Syndication Format ([RFC4287]).  It provides a set of functions to
+;; create an Atom feed based on a lisp structure.
 ;;
-;;   The structure of an Atom document is represented in a list of the
-;;   format:
+;; [RFC4287]: http://www.ietf.org/rfc/rfc4287.txt
 ;;
-;;   (ELEMENT ATTR VAL [VAL;VAL;VAL])
+;; 2 Installation
+;; ~~~~~~~~~~~~~~~
 ;;
-;;   Where ELEMENT is a symbol with the element's name, ATTR is a list of
-;;   cons with XML attributes (might be empty) and VAL are mandatory and
-;;   optional values of the element.  For elements which contain other
-;;   atom elements (i.e. /containers/: feed, entry, and source) the first
-;;   value is expected to be a list with those elements.
+;; =atom-syndication.el= is developed in a public git repository on
+;; [Github].  You can clone the repository using git
 ;;
-;;   Hence a simple feed would be represented as:
+;; git clone git://github.com/dmj/atom-syndication.git
 ;;
-;;      `(feed nil
-;;             ((title nil "This is an example feed")
-;;              (updated nil ,(current-time))
-;;              (id nil "376c73f3-8483-44d8-9d3e-8da7cba0ebf1")
-;;              (entry nil
-;;                     ((title nil "This is an entry")
-;;                      (id nil "d11e07e2-127f-4789-ab17-1bc2d6c80e28")
-;;                      (updated nil ,(current-time))))))
+;; The repository ships with a copy of the [RELAX NG Compact Scheme] of the
+;; Atom Syndication Format that can be used to check the validity of a
+;; feed with [nxml-mode].[1]
 ;;
-;;   And calling `atom-syndication-syndicate' with this list as argument
-;;   returns a string with the corresponding feed:
+;; [Github]: http://github.com/dmj/atom-syndication/
+;; [RELAX NG Compact Scheme]: http://www.relaxng.org
+;; [nxml-mode]: http://www.thaiopensource.com/nxml-mode/
 ;;
-;;     <feed xmlns=\"http://www.w3.org/2005/Atom\">
-;;       <title>This is an example feed</title>
+;; 3 Concept
+;; ~~~~~~~~~~
+;;
+;; Atom feed documents are XML documents, consisting of probably nested
+;; Atom elements.  An Atom element is represented by a list of the
+;; following format:
+;;
+;; (ELEMENT ATTR VAR [VAR VAR ...])
+;;
+;; Where ELEMENT is the symbol of the element name, ATTR is a list of
+;; cons with XML attributes and VAR are values of the element.  The
+;; distinction between XML attributes and XML container data is handled
+;; transparently: Atom element values that are, at the end, XML
+;; attributes can either represented in ATTR, a list of cons, or optional
+;; values of the element.  Thus, the list representing the
+;; atom:generator element
+;;
+;;
+;; (generator nil "Example Generator" "1.0" "http://example.tld/")
+;;
+;; is equivalent to
+;;
+;; (generator ((version . "1.0") (uri . "http://example.tld/")) "Example Generator")
+;;
+;; For Atom container elements, that is: Atom elements that contain one
+;; or more other elements, the first value is expected to be a list with
+;; the child elements.
+;;
+;; To achieve compliance with the Atom specification, this library
+;; implements a set of rules to check for the presence of mandatory
+;; elements in a container element as well as the validity of Atom
+;; element values.  If you want to add Atom extensions or modify the
+;; rules in other ways you can customize the variables
+;; `atom-syndication-attribute-xtra-alist',
+;; `atom-syndication-element-xtra-alist', and
+;; `atom-syndication-container-xtra-alist'.
+;;
+;; 4 Usage
+;; ~~~~~~~~
+;;
+;; The most convenient function to create an Atom feed is
+;; `atom-syndication-syndicate' that accepts a lisp representation of an
+;; Atom container element as argument and returns a string with the XML
+;; markup of this element.
+;;
+;; For example calling this function with a simple feed that is
+;; represented in this lisp structure:
+;;
+;;   `(feed nil
+;;          ((title nil "This is an example feed")
+;;           (updated nil ,(current-time))
+;;           (id nil "376c73f3-8483-44d8-9d3e-8da7cba0ebf1")
+;;           (entry nil
+;;                  ((title nil "This is an entry")
+;;                   (id nil "d11e07e2-127f-4789-ab17-1bc2d6c80e28")
+;;                   (updated nil ,(current-time))))))
+;;
+;; Will return a string with a proper markup for an Atom feed.
+;;
+;;   <feed xmlns=\"http://www.w3.org/2005/Atom\">
+;;     <title>This is an example feed</title>
+;;     <updated>2010-04-19T16:28:10+02:00</updated>
+;;     <id>376c73f3-8483-44d8-9d3e-8da7cba0ebf1</id>
+;;     <entry>
+;;       <title>This is an entry</title>
+;;       <id>d11e07e2-127f-4789-ab17-1bc2d6c80e28</id>
 ;;       <updated>2010-04-19T16:28:10+02:00</updated>
-;;       <id>376c73f3-8483-44d8-9d3e-8da7cba0ebf1</id>
-;;       <entry>
-;;         <title>This is an entry</title>
-;;         <id>d11e07e2-127f-4789-ab17-1bc2d6c80e28</id>
-;;         <updated>2010-04-19T16:28:10+02:00</updated>
-;;       </entry>
-;;     </feed>
+;;     </entry>
+;;   </feed>
 ;;
-;; * Elements with optional values
-;;
-;;   While in the specifications there is a clear distinction of which
-;;   values of a element are stored as XML attributes and which are
-;;   stored as contained data atom-syndication.el does not require a user
-;;   of the library to look up which element values are in fact
-;;   attributes and which are not.
-;;
-;;   This means that for example the atom generator element
-;;
-;;     <generator version="1.0" uri="http://example.tld">Example Generator</generator>
-;;
-;;   Can be represented in two ways: Using the version and the uri
-;;   property as fourth and fifth element of the element list or
-;;   explicitly specifying them as XML attributes:
-;;
-;;     (generator nil "Example Generator" "1.0" "http://example.tld")
-;;
-;;   Is equivalent to
-;;
-;;     (generator ((version . "1.0") (url . "http://example.tld")) "Example Generator")
-;;
-;; * Compliance
-;;
-;;   To achieve compliance with the specifications of RFC 4287
-;;   atom-syndication.el implements checks for the validity of a element
-;;   values and container elements and throws an error if it detects
-;;   something that is assumed to be a violation of the specs.
-;;
+;; Besides `atom-syndication-syndicate' there is a function for each Atom
+;; element that is called with the element values as arguments,
+;; e.g. `atom-syndication-element-entry' which returns XML markup for a
+;; single feed entry element.
 
 ;;; Code:
 
@@ -550,8 +576,7 @@ language of the resource pointed to by HREF."
   (setq attr (append (list (cons 'href href)) attr))
   (atom-syndication-element 'link attr nil))
 
-(defun atom-syndication-element-generator (attr name
-					   &optional version uri)
+(defun atom-syndication-element-generator (attr name &optional version uri)
   "Return generator metadata element.
 
 ATTR is a list of cons with xml attributes.
@@ -612,7 +637,7 @@ Optional argument VALUE is string or symbol with element value."
 			(cdr v))) value ""))
 		 "</" (symbol-name name))
        " /")
-     ">")))
+     ">\n")))
 
 (defun atom-syndication-attribute (attr)
   "Return attribute string for ATTR.
