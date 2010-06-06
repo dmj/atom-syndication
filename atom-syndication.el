@@ -1,6 +1,7 @@
 ;;; atom-syndication.el --- Elisp implementation of the atom syndication format
 ;;
 ;; Author: David Maus <dmaus [at] ictsoc.de>
+;; Version: 0.1
 ;; Keywords: standards, hypermedia
 ;;
 ;; Copyright (C) 2010 by David Maus
