@@ -229,6 +229,14 @@ otherwise.  The second value (i.e. third cell of the correspoding
 list) is t if the element can occur multiple times including zero
 or nil otherwise.")
 
+(defconst atom-syndication-xml-entity-alist
+  '((?< . "&lt;")
+    (?> . "&gt;")
+    (?& . "&amp;")
+    (?\" . "&quot;")
+    (?\' . "&apos;"))
+  "Alist of characters that need special entity markup.")
+
 (defcustom atom-syndication-attribute-xtra-alist nil
   "Alist with additional attributes.
 
@@ -664,13 +672,10 @@ cdr."
 
 ;;;; Misc functions
 (defun atom-syndication-sanitize (text)
-  "Sanitize TEXT for xml output.
-
-Replace & and < by their html encoding entities."
-  (replace-regexp-in-string
-   "<" "&lt;"
-   (replace-regexp-in-string
-    "&" "&amp;" text)))
+  "Sanitize TEXT for xml output."
+  (mapconcat (lambda (chr)
+	       (let ((rpl (assoc chr atom-syndication-xml-entity-alist)))
+		 (if rpl (cdr rpl) (char-to-string chr)))) text ""))
 
 (defun atom-syndication-simple-xhtml (text)
   "Return xhtml markup of TEXT.
